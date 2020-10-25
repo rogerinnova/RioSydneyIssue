@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="IsPermissions" platform="Android">
+  <const name="Gps" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      Gps
+    </value>
+  </const>
+  <const name="Camera" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      Camera
+    </value>
+  </const>
+  <const name="DataAcc" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      DataAcc
+    </value>
+  </const>
+  <const name="Network" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      Network
+    </value>
+  </const>
+  <const name="WiFi" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      WiFi
+    </value>
+  </const>
+  <const name="BlueTooth" type="Pmsion" file="IsPermissions.pas" line="25">
+    <value>
+      BlueTooth
+    </value>
+  </const>
+  <enum name="Pmsion" file="IsPermissions.pas" line="25">
+    <element value="0" name="Gps" file="IsPermissions.pas" line="25" />
+    <element value="1" name="Camera" file="IsPermissions.pas" line="25" />
+    <element value="2" name="DataAcc" file="IsPermissions.pas" line="25" />
+    <element value="3" name="Network" file="IsPermissions.pas" line="25" />
+    <element value="4" name="WiFi" file="IsPermissions.pas" line="25" />
+    <element value="5" name="BlueTooth" file="IsPermissions.pas" line="25" />
+  </enum>
+  <set name="PmsmSet" type="Pmsion">
+    <element name="Gps" />
+    <element name="Camera" />
+    <element name="DataAcc" />
+    <element name="Network" />
+    <element name="WiFi" />
+    <element name="BlueTooth" />
+  </set>
+  <anonMethod name="TPermissionReturnProcRef" file="IsPermissions.pas" line="27">
+    <procedure name="Invoke" visibility="public" procflags="abstract virtual" file="IsPermissions.pas" line="27">
+      <parameters>
+        <parameter name="AllGood" type="Boolean" paramflags="const" />
+        <parameter name="AAllGranted" type="PmsmSet" paramflags="const" />
+        <parameter name="APartialGranted" type="PmsmSet" paramflags="const" />
+        <parameter name="FailedMsg" type="string" paramflags="const" />
+      </parameters>
+    </procedure>
+  </anonMethod>
+  <procedure name="PermissionsGranted" visibility="public" file="IsPermissions.pas" line="45">
+    <parameters>
+      <parameter name="AReq" type="PmsmSet" />
+      <parameter name="ADlgPasses" type="Boolean" />
+      <parameter name="ADlgFails" type="Boolean" />
+      <parameter name="ReturnProc" type="TPermissionReturnProcRef" />
+    </parameters>
+  </procedure>
+</namespace>

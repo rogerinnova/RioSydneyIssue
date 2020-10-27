@@ -185,6 +185,12 @@ begin
     LFileDataDir := TPath.Combine(TPath.GetPicturesPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetPicturesPath',
       LFileDataDir));
+    LFileDataDir := TPath.Combine(TPath.GetCameraPath, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetCameraPath',
+      LFileDataDir));
+    LFileDataDir := TPath.Combine(TPath.GetDownloadsPath, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetDownloadsPath',
+      LFileDataDir));
     LFileDataDir := TPath.Combine(TPath.GetSharedDocumentsPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetSharedDocumentsPath',
       LFileDataDir));

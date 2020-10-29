@@ -10,6 +10,7 @@ uses
 {$IFDEF Android}
   Androidapi.JNI.JavaTypes, Androidapi.JNIBridge,
   Androidapi.Helpers, Androidapi.JNI.Os,
+  Androidapi.IOUtils,
 {$ENDIF}
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.ScrollBox,
   FMX.Memo, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Memo.Types;
@@ -171,10 +172,19 @@ begin
   end;
   TstList := TStringList.Create;
   Try
-    TstList.Add('Testing File save');
+{$IFDEF VER340}
+    MmoSamplingDetails.Lines.Add('This is Sydney');
+    TstList.Add('This is Sydney');
+{$Else}
+    MmoSamplingDetails.Lines.Add('Not Sydney');
+    TstList.Add('Not Sydney');
+{$Endif}
+   TstList.Add('Testing File save');
     TstList.Add('Testing File Line2');
     TstList.Add(FormatdateTime('dd mmm yy hh:nn:ss', now));
-    TstList.Add(TPath.GetSharedDocumentsPath);
+    TstList.Add('GetExternalDocumentsDir::'+GetExternalDocumentsDir);
+    TstList.Add('TPath.GetSharedCameraPath::'+TPath.GetSharedCameraPath);
+    TstList.Add('TPath.GetSharedDocumentsPath::'+TPath.GetSharedDocumentsPath);
     MmoSamplingDetails.Lines.Add(TPath.GetSharedDocumentsPath);
     LFileDataDir := TPath.Combine(TPath.GetHomePath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetHomePath',
@@ -188,11 +198,23 @@ begin
     LFileDataDir := TPath.Combine(TPath.GetCameraPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetCameraPath',
       LFileDataDir));
+    LFileDataDir := TPath.Combine(TPath.GetDocumentsPath, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetDocumentsPath',
+      LFileDataDir));
     LFileDataDir := TPath.Combine(TPath.GetDownloadsPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetDownloadsPath',
       LFileDataDir));
+    LFileDataDir := TPath.Combine(GetExternalDocumentsDir, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetExternalDocumentsDir',
+      LFileDataDir));
     LFileDataDir := TPath.Combine(TPath.GetSharedDocumentsPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetSharedDocumentsPath',
+      LFileDataDir));
+    LFileDataDir := TPath.Combine(TPath.GetSharedPicturesPath, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetSharedPicturesPath',
+      LFileDataDir));
+    LFileDataDir := TPath.Combine(TPath.GetSharedCameraPath, 'TestSaveDir');
+    MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetSharedCameraPath',
       LFileDataDir));
   Finally
     freeAndNil(TstList);

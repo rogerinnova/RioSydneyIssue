@@ -10,7 +10,7 @@ uses
 {$IFDEF Android}
   Androidapi.JNI.JavaTypes, Androidapi.JNIBridge,
   Androidapi.Helpers, Androidapi.JNI.Os,
-  Androidapi.IOUtils,
+  Androidapi.ioUtils,
 {$ENDIF}
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.ScrollBox,
   FMX.Memo, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Memo.Types;
@@ -22,12 +22,16 @@ type
     BtnAllPermissions: TButton;
     Panel1: TPanel;
     MmoSamplingDetails: TMemo;
+    BtnReadFiles: TButton;
     procedure BtnTestDataClick(Sender: TObject);
     procedure BtnDataPermissioonClick(Sender: TObject);
     procedure BtnAllPermissionsClick(Sender: TObject);
+    procedure BtnReadFilesClick(Sender: TObject);
   private
+    FLastTextFileName,
     { Private declarations }
     FFailedPermissions { , FAcceptedPermissions } : string;
+    Function ListFilesInDirectory(ADir: String; ADirLimit: Integer): String;
   public
     { Public declarations }
   end;
@@ -68,7 +72,7 @@ Begin
     procedure(const APermissions: TArray<string>;
       const AGrantResults: TArray<TPermissionStatus>)
     var
-      ii: integer;
+      ii: Integer;
       GrantedTxt, GrantFailedTxt: String;
       GoodResult: Boolean;
     begin
@@ -114,12 +118,72 @@ begin
   PermissionsGrant(True);
 end;
 
+procedure TForm4.BtnReadFilesClick(Sender: TObject);
+Var
+  NxtDir, FileText: String;
+  Limit,DirSrchLimit: Integer;
+  TextFileStrm: TFileStream;
+begin
+  Try
+    Limit := 5;
+    DirSrchLimit:=10;
+    FLastTextFileName := '';
+{$IFDEF VER340}
+    MmoSamplingDetails.Lines.Add('This is Sydney');
+{$ELSE}
+    MmoSamplingDetails.Lines.Add('Not Sydney');
+{$ENDIF}
+
+{$IFDEF MSWINDOWS}
+    MmoSamplingDetails.Lines.Add('Windows c:\');
+    NxtDir := ListFilesInDirectory('c:\',DirSrchLimit);
+{$ELSE}
+    MmoSamplingDetails.Lines.Add('______________________com.embarcadero.AndroidPermRioSydneyMin/files/Documents');
+    NxtDir := ListFilesInDirectory('/storage/emulated/0/Android/data/com.embarcadero.AndroidPermRioSydneyMin/files',DirSrchLimit);
+    MmoSamplingDetails.Lines.Add('Android/data______________________');
+    NxtDir := ListFilesInDirectory('/storage/emulated/0/Android/data',DirSrchLimit);
+    MmoSamplingDetails.Lines.Add('DCIM');
+    NxtDir := ListFilesInDirectory('/storage/emulated/0/DCIM',DirSrchLimit);
+{$ENDIF}
+    while (NxtDir <> '') and (Limit > 0) do
+    Begin
+      Dec(Limit);
+      MmoSamplingDetails.Lines.Add(IntToStr(Limit) + '/ ' +
+        ExtractFileName(NxtDir));
+      NxtDir := ListFilesInDirectory(NxtDir,DirSrchLimit);
+    End;
+    if FLastTextFileName <> '' then
+      Try
+        TextFileStrm := TFileStream.Create(FLastTextFileName, fmOpenRead);
+        if TextFileStrm <> nil then
+        Begin
+          FileText :=
+            '-----------------------------------------------------------' +
+            '.....................................................................'
+            + ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,';
+          SetLength(FileText, 80);
+          if TextFileStrm.Read(FileText[1], 30) > 20 then
+            MmoSamplingDetails.Lines.Add(FileText);
+        End;
+
+      Except
+        On E: Exception Do
+          MmoSamplingDetails.Lines.Add('Exception FLastTextFileName::' +
+            E.Message)
+      End;
+  Except
+    On E: Exception Do
+      MmoSamplingDetails.Lines.Add('Exception Read Files::' + E.Message)
+  End;
+
+end;
+
 procedure TForm4.BtnTestDataClick(Sender: TObject);
   Function DoTestWrite(Const ATstList: TStringList; Const Test: String;
   AFileDir: String): String;
   var
     Ext, FileName: String;
-    i: integer;
+    i: Integer;
   begin
     i := 1;
     try
@@ -146,7 +210,7 @@ procedure TForm4.BtnTestDataClick(Sender: TObject);
     Except
       On E: Exception Do
       Begin
-        Result := 'Exception::' + Test + #13#10 + E.message + #13#10 + FileName;
+        Result := 'Exception::' + Test + #13#10 + E.Message + #13#10 + FileName;
         // TDialogService.ShowMessage('Data Write Fail:' + Test + '::' + FileName);
       end
     end;
@@ -175,16 +239,19 @@ begin
 {$IFDEF VER340}
     MmoSamplingDetails.Lines.Add('This is Sydney');
     TstList.Add('This is Sydney');
-{$Else}
+{$ELSE}
     MmoSamplingDetails.Lines.Add('Not Sydney');
     TstList.Add('Not Sydney');
-{$Endif}
-   TstList.Add('Testing File save');
+{$ENDIF}
+    TstList.Add('Testing File save');
     TstList.Add('Testing File Line2');
     TstList.Add(FormatdateTime('dd mmm yy hh:nn:ss', now));
-    TstList.Add('GetExternalDocumentsDir::'+GetExternalDocumentsDir);
-    TstList.Add('TPath.GetSharedCameraPath::'+TPath.GetSharedCameraPath);
-    TstList.Add('TPath.GetSharedDocumentsPath::'+TPath.GetSharedDocumentsPath);
+{$IFNDEF MSWINDOWS}
+    TstList.Add('GetExternalDocumentsDir::' + GetExternalDocumentsDir);
+{$ENDIF}
+    TstList.Add('TPath.GetSharedCameraPath::' + TPath.GetSharedCameraPath);
+    TstList.Add('TPath.GetSharedDocumentsPath::' +
+      TPath.GetSharedDocumentsPath);
     MmoSamplingDetails.Lines.Add(TPath.GetSharedDocumentsPath);
     LFileDataDir := TPath.Combine(TPath.GetHomePath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetHomePath',
@@ -204,9 +271,11 @@ begin
     LFileDataDir := TPath.Combine(TPath.GetDownloadsPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetDownloadsPath',
       LFileDataDir));
+{$IFNDEF MSWINDOWS}
     LFileDataDir := TPath.Combine(GetExternalDocumentsDir, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetExternalDocumentsDir',
       LFileDataDir));
+{$ENDIF}
     LFileDataDir := TPath.Combine(TPath.GetSharedDocumentsPath, 'TestSaveDir');
     MmoSamplingDetails.Lines.Add(DoTestWrite(TstList, 'GetSharedDocumentsPath',
       LFileDataDir));
@@ -219,6 +288,63 @@ begin
   Finally
     freeAndNil(TstList);
   End;
+end;
+
+Function TForm4.ListFilesInDirectory(ADir: String; ADirLimit: Integer): String;
+Var
+  SearchRec: TSearchRec;
+  SrchRslt, Limit: Integer;
+  Srch:String;
+begin
+  Result := '';
+  SrchRslt := 0;
+  Limit := 5;
+  Dec(ADirLimit);
+  if DirectoryExists(ADir) then
+  Begin
+//    Srch:=TPath.Combine(ADir, '*.*');
+    Srch:=TPath.Combine(ADir, '*');
+    SrchRslt := FindFirst(Srch, faAnyFile, SearchRec);
+    while (SrchRslt = 0) do
+      Try
+        if (SearchRec.Name <> '') then
+{$IFDEF NextGen}
+          if not(SearchRec.Name[0] = '.') then
+{$ELSE}
+          if not(SearchRec.Name[1] = '.') then
+{$ENDIF}
+            if DirectoryExists(System.ioUtils.TPath.Combine(ADir,
+              SearchRec.Name)) then
+            Begin
+              MmoSamplingDetails.Lines.Add('Directory-' + SearchRec.Name);
+              Result := System.ioUtils.TPath.Combine(ADir, SearchRec.Name);
+              // Last Directory
+              if ADirLimit > 0 then
+                if Result <> '' then
+                  ListFilesInDirectory(Result,ADirLimit);
+            End
+            Else if (Limit > 0) then
+            begin
+              if (Pos('.txt', SearchRec.Name) > 3) or
+                (Pos('.csv', SearchRec.Name) > 3) then
+                FLastTextFileName := System.ioUtils.TPath.Combine(ADir,
+                  SearchRec.Name);
+              MmoSamplingDetails.Lines.Add('     ' + SearchRec.Name);
+              Dec(Limit);
+            end;
+        SrchRslt := FindNext(SearchRec);
+      Except
+        On E: Exception do
+        Begin
+          SrchRslt := -1;
+          MmoSamplingDetails.Lines.Add('Error :=' + E.Message);
+        end;
+      End;
+    FindClose(SearchRec);
+  end
+  Else
+    MmoSamplingDetails.Lines.Add('No Such Dir ' + ADir);
+
 end;
 
 end.

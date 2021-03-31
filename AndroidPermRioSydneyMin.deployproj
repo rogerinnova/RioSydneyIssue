@@ -6,11 +6,13 @@
     <PropertyGroup>
         <DeviceId Condition="'$(Platform)'=='Android'">R9JN50829YJ</DeviceId>
         <DeviceId Condition="'$(Platform)'=='Android64'">R9JN50829YJ</DeviceId>
+        <DeviceId Condition="'$(Platform)'=='iOSDevice32'"/>
         <DeviceId Condition="'$(Platform)'=='iOSDevice64'"/>
         <DeviceId Condition="'$(Platform)'=='iOSSimulator'">iPhone5</DeviceId>
     </PropertyGroup>
     <ItemGroup Condition="'$(Platform)'=='iOSDevice64'"/>
     <ItemGroup Condition="'$(Platform)'=='Win64'"/>
+    <ItemGroup Condition="'$(Platform)'=='iOSDevice32'"/>
     <ItemGroup Condition="'$(Platform)'=='Win32'">
         <DeployFile Include="Win32\Debug\AndroidPermRioSydneyMin.exe" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AndroidPermRioSydneyMin\</RemoteDir>
@@ -23,7 +25,17 @@
             <Required>True</Required>
         </DeployFile>
     </ItemGroup>
-    <ItemGroup Condition="'$(Platform)'=='OSX64'"/>
+    <ItemGroup Condition="'$(Platform)'=='OSX32'">
+        <DeployFile Include="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib">
+            <RemoteDir>AndroidPermRioSydneyMin.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>libcgunwind.1.0.dylib</RemoteName>
+            <DeployClass>DependencyModule</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='Android'">
         <DeployFile Include="$(BDS)\bin\Artwork\Android\FM_NotificationIcon_72x72.png" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AndroidPermRioSydneyMin\res\drawable-xxhdpi\</RemoteDir>
@@ -117,7 +129,7 @@
         </DeployFile>
         <DeployFile Include="$(BDS)\lib\android\debug\mips\libnative-activity.so" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AndroidPermRioSydneyMin\library\lib\mips\</RemoteDir>
-            <RemoteName>libAndroidPermRioSydney.so</RemoteName>
+            <RemoteName>libAndroidPermRioSydneyMin.so</RemoteName>
             <DeployClass>AndroidLibnativeMipsFile</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
@@ -217,7 +229,7 @@
         </DeployFile>
         <DeployFile Include="$(BDS)\lib\android\debug\armeabi\libnative-activity.so" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AndroidPermRioSydneyMin\library\lib\armeabi\</RemoteDir>
-            <RemoteName>libAndroidPermRioSydney.so</RemoteName>
+            <RemoteName>libAndroidPermRioSydneyMin.so</RemoteName>
             <DeployClass>AndroidLibnativeArmeabiFile</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
@@ -270,6 +282,7 @@
             <Overwrite>True</Overwrite>
         </DeployFile>
     </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='OSX64'"/>
     <ItemGroup Condition="'$(Platform)'=='iOSSimulator'">
         <DeployFile Include="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib">
             <RemoteDir>AndroidPermRioSydneyMin.app\</RemoteDir>
